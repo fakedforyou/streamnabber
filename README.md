@@ -74,20 +74,42 @@ After a failure, the URL enters `retry_wait` and is retried after
 
 ## Important behavior
 
-This is a persistent monitor, not a one-shot queue. An enabled URL remains
+* To lock the resolution edit app.py. For example, to set it to 720p or less modify the download_sources area to be
+  def download_source(source_id, url, model_name):
+    try:
+        target_dir = DOWNLOAD_DIR / re.sub(r"[^A-Za-z0-9._ -]+", "_", model_name)
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        opts = {
+            "paths": {"home": str(target_dir)},
+            # Epoch allows the same persistent/live URL to produce a new file later.
+            "outtmpl": "%(title).160B [%(id)s] [%(epoch)s].%(ext)s",
+            "format": "bestvideo[height<=720]+bestaudio/best[height<=720]",
+            "continuedl": True,
+            "overwrites": False,
+            "retries": 10,
+            "fragment_retries": 10,
+            "file_access_retries": 3,
+            "progress_hooks": [progress_hook(source_id)],
+            "quiet": True,
+            "no_warnings": False,
+        }
+
+* This is a persistent monitor, not a one-shot queue. An enabled URL remains
 in the database after a successful download and will be tried again later.
 
-Disabling a URL prevents future starts. It does not forcibly terminate an
+* Disabling a URL prevents future starts. It does not forcibly terminate an
 yt-dlp process/thread that is already running.
 
-Keep Gunicorn at one worker unless the supervisor is moved into a separate
+* Keep Gunicorn at one worker unless the supervisor is moved into a separate
 service or replaced by a distributed job queue.
 
-If exposing this beyond a trusted LAN, put it behind authentication and TLS.
-Only download content you are authorized to download.
+* If exposing this beyond a trusted LAN, put it behind authentication and TLS.
 
-You can edit the list offline by using a DB Browser for SQLite or similar
+* Only download content you are authorized to download.
 
-This application is useful for Bongocam and Chaturbate. 
+* You can edit the list offline by using a DB Browser for SQLite or similar
 
-Only use this app for streams you are authorized to capture.
+* This application is useful for Bongocam and Chaturbate. 
+
+* Only use this app for streams you are authorized to capture.
