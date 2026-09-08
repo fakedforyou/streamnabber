@@ -74,7 +74,8 @@ After a failure, the URL enters `retry_wait` and is retried after
 
 ## Important behavior
 
-* To lock the resolution edit app.py. For example, to set it to 720p or less modify the download_sources area to be
+* To lock the resolution edit app.py. For example, to set it to 720p or less modify the download_sources area to be:
+  
   def download_source(source_id, url, model_name):
     try:
         target_dir = DOWNLOAD_DIR / re.sub(r"[^A-Za-z0-9._ -]+", "_", model_name)
