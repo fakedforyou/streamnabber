@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="10">
+  <title>StreamNabber</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main class="container">
+  <header>
+    <div>
+      <h1>streamnabber</h1>
+      <p>Persistent URL monitoring and automatic downloads</p>
+    </div>
+    <div class="settings">
+      Check {{ check_interval }}s · Recheck {{ recheck_interval }}s · Max {{ max_concurrent }} active
+    </div>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <section class="panel form-panel">
+    <form method="post" action="{{ url_for('add_source') }}">
+      <div class="field grow">
+        <label>URL</label>
+        <input name="url" type="url" placeholder="https://example.com/..." required>
+      </div>
+      <div class="field model">
+        <label>Model name <span>(optional)</span></label>
+        <input name="model_name" placeholder="Auto-detected from URL">
+      </div>
+      <button type="submit">Add URL</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Monitored URLs</h2>
+      <span>{{ sources|length }} configured</span>
+    </div>
+
+    {% if sources %}
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>URL</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th>Last download</th>
+            <th>Attempts</th>
+            <th>Controls</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for s in sources %}
+          <tr class="{% if not s.enabled %}disabled{% endif %}">
+            <td class="model-name">{{ s.model_name }}</td>
+            <td class="url">
+              <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.url }}</a>
+              {% if s.filename %}<small>{{ s.filename }}</small>{% endif %}
+              {% if s.error %}<small class="error-text">{{ s.error }}</small>{% endif %}
+            </td>
+            <td>
+              {% if not s.enabled %}
+                <span class="pill off">disabled</span>
+              {% else %}
+                <span class="pill {{ s.status }}">{{ s.status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="bar"><div style="width:{{ s.progress or 0 }}%"></div></div>
+              <small>
+                {{ "%.1f"|format(s.progress or 0) }}%
+                {% if s.speed %} · {{ s.speed }}{% endif %}
+                {% if s.eta %} · ETA {{ s.eta }}{% endif %}
+              </small>
+            </td>
+            <td>{{ s.last_download_at|localtime }}</td>
+            <td>{{ s.attempts }}</td>
+            <td class="controls">
+              <form method="post" action="{{ url_for('toggle_source', source_id=s.id) }}">
+                <button class="secondary">{{ "Enable" if not s.enabled else "Disable" }}</button>
+              </form>
+              {% if s.status != 'downloading' %}
+              <form method="post" action="{{ url_for('retry_source', source_id=s.id) }}">
+                <button class="secondary">Try now</button>
+              </form>
+              <form method="post" action="{{ url_for('delete_source', source_id=s.id) }}"
+                    onsubmit="return confirm('Remove this URL from monitoring?')">
+                <button class="danger">Remove</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty">No URLs are being monitored yet.</div>
+    {% endif %}
+  </section>
+</main>
+</body>
+</html>
