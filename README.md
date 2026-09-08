@@ -70,7 +70,7 @@ After a failure, the URL enters `retry_wait` and is retried after
 | `RECHECK_INTERVAL` | 60 | Delay after a successful download before trying the URL again |
 | `RETRY_INTERVAL` | 60 | Delay after a yt-dlp error |
 | `STALE_INTERVAL` | 180 | Lost-heartbeat threshold |
-| `MAX_CONCURRENT_DOWNLOADS` | 2 | Maximum different URLs downloading concurrently |
+| `MAX_CONCURRENT_DOWNLOADS` | 100 | Maximum different URLs downloading concurrently. This can be changed to suit your environment.  |
 
 ## Important behavior
 
@@ -85,3 +85,9 @@ service or replaced by a distributed job queue.
 
 If exposing this beyond a trusted LAN, put it behind authentication and TLS.
 Only download content you are authorized to download.
+
+You can edit the list offline by using a DB Browser for SQLite or similar
+
+This application is useful for Bongocam and Chaturbate. 
+
+Only use this app for streams you are authorized to capture.
