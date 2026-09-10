@@ -223,6 +223,7 @@ def download_source(source_id, url, model_name):
             "paths": {"home": str(target_dir)},
             # Epoch allows the same persistent/live URL to produce a new file later.
             "outtmpl": "%(title).160B [%(id)s] [%(epoch)s].%(ext)s",
+            "format": "bestvideo[height<=720]+bestaudio/best[height<=720]",
             "continuedl": True,
             "overwrites": False,
             "retries": 10,
